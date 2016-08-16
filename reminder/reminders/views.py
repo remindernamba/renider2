@@ -22,9 +22,14 @@ def add_group(request):
 
 def add_reminders(request, group_id):
     forms = CreateIncome()
-    if request.POST:
-        forms = CreateIncome(request.POST)
-        create = Reminder.objects.create(name=request.POST['name'], text = request.POST['message'] , group=Group.objects.get(pk=int(group_id)))
+    forms = CreateIncome(request.POST or None)
+    if forms.is_valid():
+        forms = forms.save(commit=False)
+        forms.name = request.POST['name']
+        forms.text = request.POST['message']
+        forms.group = Group.objects.get(pk=int(group_id))
+        # create = Reminder.objects.create(name=request.POST['name'], text = request.POST['message'] , group=Group.objects.get(pk=int(group_id)))
+        forms.save()
         return redirect('reminders:reminderss', group_idi=group_id)
     return render(request, 'reminder/add_reminder.html', {'forms': forms})
 
@@ -32,3 +37,12 @@ def add_reminders(request, group_id):
 def reminders_page(request, group_idi):
     group_id = int(group_idi)
     return render(request, 'reminder/reminder.html', {'gr_id': group_id})
+
+
+def del_remind(request, del_id):
+    if 1 == 1:
+        delete = Reminder.objects.get(pk=del_id)
+        group = delete.group
+        group.user.remove(request.user)
+        return redirect('profiles:profiles')
+    return render(request, 'reminder/delete_reminder.html', {})
